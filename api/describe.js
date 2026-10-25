@@ -4,7 +4,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { json, checkPassword, readPhotos, UserError } from "./_shared.js";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const LANGS = ["Русский", "Deutsch", "Українська", "English"];
 
 function buildPrompt({ template, notes, lang }) {
