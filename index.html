@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2b705">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ФотоОпис">
+<title>ФотоОпис</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Одна узкая колонка под телефон: фото → данные → результат */
+:root{
+  --bg:#eef0f2; --surface:#ffffff; --fg:#1c2127; --muted:#5d6670; --line:#d3d8de;
+  --accent:#f2b705; --accent-ink:#1c2127; --danger:#b3261e; --ok:#1f7a4d;
+  --display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#15191d; --surface:#1f252b; --fg:#e7eaee; --muted:#9aa3ad; --line:#333b44;
+  --accent:#f5c22b; --accent-ink:#15191d; --danger:#ff8a80; --ok:#6fd3a0; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+.wrap{max-width:620px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:center;gap:12px}
+.plate{width:40px;height:40px;flex:none;border-radius:6px;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font:700 13px var(--display);position:relative}
+.plate::before,.plate::after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:var(--accent-ink);opacity:.5;top:5px}
+.plate::before{left:5px}.plate::after{right:5px}
+h1{margin:0;font:700 20px/1.1 var(--display);letter-spacing:-.01em}
+.sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.step{display:flex;align-items:baseline;gap:8px;margin:0;font-weight:600;font-size:15px}
+.step span{font:500 11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.hint{margin:0;color:var(--muted);font-size:13px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.thumb{position:relative;aspect-ratio:1;max-width:100%;border-radius:8px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:1;cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;
+  padding:11px 14px;font:500 15px var(--body);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.grow{flex:1 1 140px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.big{width:100%;padding:15px;font-size:16px}
+label.lbl{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+textarea,select,input[type=password]{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--bg);
+  color:var(--fg);font:16px/1.45 var(--body);padding:10px 12px}
+textarea.mono{font:13px/1.5 var(--mono)}
+details summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"＋";color:var(--muted)}
+details[open] summary::after{content:"－"}
+details[open] summary{margin-bottom:12px}
+#out{min-height:260px}
+.status{font:500 12px var(--mono);color:var(--muted);margin:0}
+.status.err{color:var(--danger)} .status.ok{color:var(--ok)}
+input[type=file]{display:none}
+.counter{font:500 12px var(--mono);color:var(--muted)}
+.lock{border-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="plate" aria-hidden="true">AI</div>
+    <div>
+      <h1>ФотоОпис</h1>
+      <p class="sub">Фото станка, оборудования или инструмента → готовое описание</p>
+    </div>
+  </header>
+
+  <section class="lock" id="lockSec" hidden>
+    <p class="step">Вход</p>
+    <label class="lbl" for="pwd">Пароль приложения (запомнится на этом телефоне)
+      <input type="password" id="pwd" autocomplete="current-password">
+    </label>
+    <button class="btn primary" id="pwdBtn" type="button">Сохранить пароль</button>
+  </section>
+
+  <section>
+    <p class="step"><span>Шаг 1</span> Фото</p>
+    <p class="hint">До 10 снимков с разных сторон. Обязательно сфотографируйте шильдик (табличку с моделью и годом).</p>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="row">
+      <button class="btn primary grow" id="camBtn" type="button">📷 Сфотографировать</button>
+      <button class="btn grow" id="galBtn" type="button">Из галереи</button>
+    </div>
+    <span class="counter" id="counter">0 из 10 фото</span>
+    <input type="file" id="camInput" accept="image/*" capture="environment">
+    <input type="file" id="galInput" accept="image/*" multiple>
+  </section>
+
+  <section>
+    <p class="step"><span>Шаг 2</span> Что известно (необязательно)</p>
+    <label class="lbl" for="notes">Состояние, наработка, комплектация, цена: всё, чего не видно на фото
+      <textarea id="notes" rows="3" placeholder="Например: в рабочем состоянии, 3 фазы, есть патрон и люнет"></textarea>
+    </label>
+    <label class="lbl" for="lang">Язык описания
+      <select id="lang">
+        <option>Русский</option><option>Deutsch</option><option>Українська</option><option>English</option>
+      </select>
+    </label>
+    <details>
+      <summary>Шаблон описания</summary>
+      <label class="lbl" for="tpl">ИИ заполнит его по фото. Шаблон сохраняется на этом устройстве.
+        <textarea id="tpl" class="mono" rows="14"></textarea>
+      </label>
+      <div class="row"><button class="btn" id="tplReset" type="button">Вернуть шаблон по умолчанию</button></div>
+    </details>
+  </section>
+
+  <button class="btn primary big" id="goBtn" type="button" disabled>Создать описание</button>
+
+  <section>
+    <p class="step"><span>Шаг 3</span> Описание</p>
+    <p class="status" id="status">Добавьте фото и нажмите «Создать описание». Текст можно править перед отправкой.</p>
+    <textarea id="out" rows="14" placeholder="Здесь появится описание"></textarea>
+    <div class="row">
+      <button class="btn primary grow" id="mailBtn" type="button" disabled>✉️ Отправить на почту</button>
+      <button class="btn grow" id="copyBtn" type="button">Скопировать</button>
+    </div>
+    <button class="btn" id="newBtn" type="button">Новый товар</button>
+  </section>
+</div>
+
+<script>
+const MAX = 10;
+const DEFAULT_TPL = `Название: [тип оборудования + производитель + модель]
+
+Производитель:
+Модель:
+Год выпуска:
+Серийный номер:
+Состояние:
+
+Технические характеристики:
+-
+-
+-
+
+Комплектация:
+
+Описание:
+[2–4 предложения: что это, для чего применяется, что видно по состоянию]`;
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+
+let photos = [];   // {blob, url}
+let busy = false;
+
+$('tpl').value = store.get('tpl') || DEFAULT_TPL;
+const savedLang = store.get('lang'); if (savedLang) $('lang').value = savedLang;
+$('tpl').addEventListener('input', () => store.set('tpl', $('tpl').value));
+$('lang').addEventListener('change', () => store.set('lang', $('lang').value));
+$('tplReset').onclick = () => { $('tpl').value = DEFAULT_TPL; store.set('tpl', DEFAULT_TPL); };
+$('out').addEventListener('input', render);
+
+$('pwd').value = store.get('pwd') || '';
+$('pwdBtn').onclick = () => { store.set('pwd', $('pwd').value); $('lockSec').hidden = true; setStatus('Пароль сохранён. Повторите действие.', 'ok'); };
+
+function setStatus(msg, cls){ const s=$('status'); s.textContent=msg; s.className='status'+(cls?' '+cls:''); }
+
+function render(){
+  const t = $('thumbs'); t.innerHTML = '';
+  photos.forEach((p,i) => {
+    const d = document.createElement('div'); d.className = 'thumb';
+    const img = document.createElement('img'); img.src = p.url; img.alt = 'Фото ' + (i+1);
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = '×';
+    b.setAttribute('aria-label', 'Удалить фото ' + (i+1));
+    b.onclick = () => { URL.revokeObjectURL(p.url); photos.splice(i,1); render(); };
+    d.append(img, b); t.append(d);
+  });
+  $('counter').textContent = photos.length + ' из ' + MAX + ' фото';
+  const full = photos.length >= MAX;
+  $('camBtn').disabled = full || busy; $('galBtn').disabled = full || busy;
+  $('goBtn').disabled = !photos.length || busy;
+  $('mailBtn').disabled = !photos.length || !$('out').value.trim() || busy;
+}
+
+// Сжимаем до 1280px JPEG: ~150–300 КБ на фото, 10 фото помещаются в лимит Vercel (4,5 МБ)
+async function prepare(file){
+  try{
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const k = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    if (bmp.close) bmp.close();
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+    if (blob) return blob;
+  }catch(e){}
+  return null; // браузер не смог прочитать формат (например, HEIC в некоторых браузерах)
+}
+
+async function addFiles(list){
+  for (const f of Array.from(list)){
+    if (photos.length >= MAX){ setStatus('Максимум ' + MAX + ' фото.', 'err'); break; }
+    if (!f.type.startsWith('image/') && f.type) continue;
+    const blob = await prepare(f);
+    if (!blob){ setStatus('Не удалось открыть «' + f.name + '». Попробуйте сделать снимок через кнопку «Сфотографировать».', 'err'); continue; }
+    photos.push({ blob, url: URL.createObjectURL(blob) });
+  }
+  render();
+}
+$('camBtn').onclick = () => $('camInput').click();
+$('galBtn').onclick = () => $('galInput').click();
+$('camInput').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+$('galInput').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+
+function formWithPhotos(){
+  const fd = new FormData();
+  photos.forEach((p,i) => fd.append('photos', p.blob, 'foto-' + (i+1) + '.jpg'));
+  return fd;
+}
+
+async function call(path, fd){
+  const res = await fetch(path, { method: 'POST', body: fd, headers: { 'x-app-password': store.get('pwd') || $('pwd').value } });
+  let data = {};
+  try { data = await res.json(); } catch(e){}
+  if (res.status === 401){ $('lockSec').hidden = false; $('pwd').focus(); throw new Error('Введите пароль приложения.'); }
+  if (res.status === 413) throw new Error('Фото слишком много или они слишком большие. Уберите пару снимков.');
+  if (!res.ok) throw new Error(data.error || ('Ошибка сервера (' + res.status + ').'));
+  return data;
+}
+
+$('goBtn').onclick = async () => {
+  busy = true; render();
+  setStatus('Анализирую ' + photos.length + ' фото. Обычно 10–30 секунд…');
+  try{
+    const fd = formWithPhotos();
+    fd.append('template', $('tpl').value.trim() || DEFAULT_TPL);
+    fd.append('notes', $('notes').value.trim());
+    fd.append('lang', $('lang').value);
+    const { text } = await call('/api/describe', fd);
+    $('out').value = text;
+    setStatus('Готово. Проверьте поля «[уточнить]», поправьте текст и отправьте на почту.', 'ok');
+  }catch(e){ setStatus(e.message, 'err'); }
+  finally{ busy = false; render(); }
+};
+
+$('mailBtn').onclick = async () => {
+  busy = true; render();
+  setStatus('Отправляю письмо…');
+  try{
+    const fd = formWithPhotos();
+    fd.append('text', $('out').value.trim());
+    const { to } = await call('/api/send', fd);
+    setStatus('Письмо отправлено на ' + to + '.', 'ok');
+  }catch(e){ setStatus(e.message, 'err'); }
+  finally{ busy = false; render(); }
+};
+
+$('copyBtn').onclick = async () => {
+  const t = $('out'); if (!t.value.trim()) return;
+  try{ await navigator.clipboard.writeText(t.value); setStatus('Скопировано.', 'ok'); }
+  catch(e){ t.focus(); t.select(); setStatus('Текст выделен, скопируйте его через меню.'); }
+};
+
+$('newBtn').onclick = () => {
+  photos.forEach(p => URL.revokeObjectURL(p.url)); photos = [];
+  $('out').value = ''; $('notes').value = ''; render();
+  setStatus('Добавьте фото следующего товара.');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "foto-opis",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Фото оборудования → описание по шаблону (Gemini) + отправка на почту (Resend)",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "resend": "^4.0.0"
+  }
+}
